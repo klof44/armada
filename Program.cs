@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -32,6 +31,11 @@ namespace armada
         private static async Task MainAsync()
         {
 
+			discord.MessageCreated += async (s, e) =>
+			{
+				CheckSwear(e.Message.Content, e.Author, e);
+			};
+			
 			await discord.ConnectAsync();
 			await Task.Delay(-1);
 		}
@@ -42,7 +46,7 @@ namespace armada
 		}
 
 		internal static List<string> armada = new List<string>();
-		internal static string assetsDir = "FIX THIS LATER";
+		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "/";
 		internal static List<ulong> InactiveServers = new List<ulong>();
 		internal static List<ulong> HasPerms = new List<ulong>();
 		internal static List<ulong> NotFunny = new List<ulong>();
@@ -127,7 +131,7 @@ namespace armada
 					string value2 = "DM channel";
 					if (!(arg.Channel is DiscordDmChannel))
 					{
-						value2 = string.Format("https://discord.com/channels/{0}/{1}/{2}", arg.Guild.Id, arg.Channel.Id, arg.Message.Id);
+						value2 = $"https://discord.com/channels/{arg.Guild.Id}/{arg.Channel.Id}/{arg.Message.Id}";
 					}
 					DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder
 					{
