@@ -143,9 +143,9 @@ namespace armada
 					discordEmbedBuilder.AddField("Link", value2, false);
 					if (arg.Guild.Id == 754835352950276189UL)
 					{
-						Program.discord.GetGuildAsync(754835352950276189UL, null).Result.GetChannel(935680546384781412UL).SendMessageAsync(discordEmbedBuilder);
+						Program.discord.GetGuildAsync(754835352950276189).Result.GetChannel(935680546384781412).SendMessageAsync(discordEmbedBuilder);
 					}
-					Program.discord.GetGuildAsync(913249395661750343UL, null).Result.GetChannel(934941707613634661UL).SendMessageAsync(discordEmbedBuilder);
+					Program.discord.GetGuildAsync(913249395661750343).Result.GetChannel(934941707613634661).SendMessageAsync(discordEmbedBuilder);
 				}
 			}
 			if (!flag)

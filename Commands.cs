@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Entities;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using System.Linq;
 
 namespace armada
 {
@@ -20,6 +23,8 @@ namespace armada
 		public async Task Help(CommandContext ctx)
 		{
 			// basic help command
+
+
 		}
 
 		[Command("funny")]
@@ -99,6 +104,26 @@ namespace armada
 		public async Task Swear(CommandContext ctx)
 		{
 			// Displays swear counter leaderboard
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+            {
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink
+				};
+				embed.AddField("Total", Program.swearCount.ToString());
+
+				string board = "";
+				Program.leaderboard.OrderBy(key => key.Value);
+				foreach (var user in Program.leaderboard)
+                {
+					board += $"<@{user.Key} - {user.Value}>";
+                }
+
+				embed.AddField("Leaderboard", board);
+
+				await ctx.RespondAsync(embed);
+            }
 		}
 
 		[Command("swearcount")]
