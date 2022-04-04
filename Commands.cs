@@ -25,8 +25,6 @@ namespace armada
 		public async Task Help(CommandContext ctx)
 		{
 			// basic help command
-
-
 		}
 
 		[Command("funny")]
@@ -46,6 +44,7 @@ namespace armada
 		public async Task Perm(CommandContext ctx, ulong id)
 		{
 			// change users who can !kill
+			// uses Program.HasPerms
 		}
 
 		[Command("actuallyfuckingdie")]
