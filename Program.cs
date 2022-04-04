@@ -14,6 +14,8 @@ namespace armada
 {
     internal class Program
     {
+		// This entire class is unreadable because of decompilation but it works so I'll leave it
+
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += Process_Exit;
@@ -28,13 +30,15 @@ namespace armada
 			discord.DisconnectAsync();
         }
 
-        private static async Task MainAsync()
-        {
+		private static async Task MainAsync()
+		{
 
 			discord.MessageCreated += async (s, e) =>
 			{
 				CheckSwear(e.Message.Content, e.Author, e);
 			};
+
+			commands.RegisterCommands<Commands>();
 			
 			await discord.ConnectAsync();
 			await Task.Delay(-1);

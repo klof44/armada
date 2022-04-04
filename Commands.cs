@@ -118,9 +118,9 @@ namespace armada
 
 				string board = "";
 				Program.leaderboard.OrderBy(key => key.Value);
-				foreach (var user in Program.leaderboard)
-                {
-					board += $"<@{user.Key} - {user.Value}>";
+                for (int i = 0; i == 10; i++)
+				{
+					board += $"\r\n<@{Program.leaderboard.ElementAt(i).Key} - {Program.leaderboard.ElementAt(i).Value}>";
                 }
 
 				embed.AddField("Leaderboard", board);
