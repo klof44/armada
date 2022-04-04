@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Lavalink;
 
-namespace BotTest.Misc
+namespace armada
 {
 	public class Misc
 	{
@@ -14,14 +14,9 @@ namespace BotTest.Misc
 
 		public static async Task PlaySong(LavalinkGuildConnection conn, CommandContext ctx)
 		{
-			while (Queue.Count > 0)
-            {
 
-            }
 		}
 
-		internal static Queue<LavalinkTrack> Queue = new Queue<LavalinkTrack>();
 		internal static Dictionary<ulong, Queue<LavalinkTrack>> Queues = new Dictionary<ulong, Queue<LavalinkTrack>>();
-		internal static CancellationTokenSource source = new CancellationTokenSource();
 	}
 }

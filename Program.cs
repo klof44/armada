@@ -126,8 +126,8 @@ namespace armada
 					Dictionary<ulong, long> dictionary = Program.leaderboard;
 					ulong id = user.Id;
 					long num = dictionary[id];
-					dictionary[id] = num + 1L;
-					Program.swearCount += 1L;
+					dictionary[id] = num + 1;
+					Program.swearCount += 1;
 					string value2 = "DM channel";
 					if (!(arg.Channel is DiscordDmChannel))
 					{

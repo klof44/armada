@@ -12,8 +12,10 @@ namespace armada
 {
     internal class Commands : BaseCommandModule
     {
+		// Normal user commands should have "if (!Program.InactiveServers.Contains(ctx.Guild.Id))" just in case something goes wrong and an admin can kill the bot without disconnecting from discord
+		// Powerful commands like !actuallyfuckingdie and !nick can be hardcoded to only accept my user id (563891145256468481)
+
 		[Command("roll")]
-		[Hidden]
 		public async Task Roll(CommandContext ctx, int count, int sides, int mod = 0)
 		{
 			// dice roll command
@@ -54,10 +56,11 @@ namespace armada
 		}
 
 		[Command("kill")]
-		[Cooldown(1, 20000.0, CooldownBucketType.Guild)]
+		[Hidden]
 		public async Task KillCommand(CommandContext ctx)
 		{
 			// Makes the bot ignore a guild
+			// Uses Program.InactiveServers
 		}
 
 		[Command("unkill")]
@@ -76,7 +79,7 @@ namespace armada
 		[Command("kys")]
 		public async Task KYS(CommandContext ctx, int volume = 50)
 		{
-			// plays LTG quote in voice chat
+			// plays LTG quote in voice chat (You should kiill yourself NOW!)
 		}
 
 		[Command("changefunny")]
@@ -84,6 +87,7 @@ namespace armada
 		public async Task YouFunny(CommandContext ctx, ulong id)
 		{
 			// changes a users persission to use voice chat commands
+			// uses	Program.NotFunny
 		}
 
 		[Command("delmsg")]
@@ -130,19 +134,22 @@ namespace armada
 		public async Task Swears(CommandContext ctx, ulong id)
 		{
 			// gives swear count of a specific user along with the ratio of messages with swears to messages without
+			// uses Program.leaderboard and Program.ratios
 		}
 
 		[Command("unswear")]
 		[Hidden]
 		public async Task UnSwear(CommandContext ctx, ulong id)
 		{
-			// remove a swear from the specified user
+			// remove a swear from the specified user (-1 to their Program.Leaderboard count)
+			// Leave this one as I set it to use wierd permissions
 		}
 
 		[Command("talk")]
 		public async Task Play(CommandContext ctx, [RemainingText] string search)
 		{
 			// plays music in voice chat from either search term or youtube link
+			// Leave this one and the commands relatred to it as I have a certain way I want to set it up
 		}
 
 		[Command("shutup")]
