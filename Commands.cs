@@ -117,10 +117,19 @@ namespace armada
 				embed.AddField("Total", Program.swearCount.ToString());
 
 				string board = "";
-				Program.leaderboard.OrderBy(key => key.Value);
-                for (int i = 0; i == 10; i++)
-				{
-					board += $"\r\n<@{Program.leaderboard.ElementAt(i).Key} - {Program.leaderboard.ElementAt(i).Value}>";
+
+				var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
+				foreach (var user in sorted)
+                {
+					if (user.Value != 0)
+                    {
+						board += $"\r\n<@{user.Key}> - {user.Value}";
+                    }
+                }
+
+				if (board == "")
+                {
+					board = "Nothing to display :(";
                 }
 
 				embed.AddField("Leaderboard", board);
