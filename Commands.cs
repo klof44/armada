@@ -7,11 +7,13 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using System.Linq;
+using DSharpPlus.Lavalink;
+using System.IO;
 
 namespace armada
 {
-    internal class Commands : BaseCommandModule
-    {
+	internal class Commands : BaseCommandModule
+	{
 		// Normal user commands should have "if (!Program.InactiveServers.Contains(ctx.Guild.Id))" just in case something goes wrong and an admin can kill the bot without disconnecting from discord
 		// Powerful commands like !actuallyfuckingdie and !nick can be hardcoded to only accept my user id (563891145256468481)
 
@@ -19,24 +21,78 @@ namespace armada
 		public async Task Roll(CommandContext ctx, int count, int sides, int mod = 0)
 		{
 			// dice roll command
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+            {
+                
+            }
 		}
 
+		//basic help command
 		[Command("help")]
 		public async Task Help(CommandContext ctx)
 		{
-			// basic help command
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				var footer = new DiscordEmbedBuilder.EmbedFooter()
+				{
+					Text = "Bot by klof44",
+					IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
+				};
+				
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Help",
+					Footer = footer,
+				};
+
+				string CommandList = "";
+				foreach (var cmd in ctx.CommandsNext.RegisteredCommands)
+				{
+					if (!cmd.Value.IsHidden)
+					{
+						CommandList += $" `{cmd.Key}` ";
+					}
+				}
+
+				embed.AddField("Commands", CommandList);
+				embed.AddField("Huh?", "For more help contact <@563891145256468481>");
+
+				await ctx.RespondAsync(embed);
+			}
+
 		}
 
 		[Command("funny")]
 		public async Task Funny(CommandContext ctx)
 		{
-			// posts random meme
+			// posts random meme from Program.assetsDir + "/bot/funny"
 		}
 
 		[Command("info")]
 		public async Task Info(CommandContext ctx)
 		{
-			// more detailed help command
+			// Help command but more info
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+                DiscordEmbedBuilder embed = new()
+                {
+                    Color = DiscordColor.HotPink,
+                    Title = "Info",
+                    Footer = new DiscordEmbedBuilder.EmbedFooter()
+                    {
+                        Text = "Bot by klof44",
+                        IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
+                    },
+                };
+
+				embed.AddField("Commands count", ctx.CommandsNext.RegisteredCommands.Count.ToString());
+                embed.AddField("Guilds", $"In {ctx.Client.Guilds.Count} guilds");
+				embed.AddField("Memes", Directory.GetFiles(Program.assetsDir + "/bot/funny").Length.ToString());
+                embed.AddField("Ping", ctx.Client.Ping.ToString() + "ms");
+            }
 		}
 
 		[Command("perm")]
@@ -109,7 +165,7 @@ namespace armada
 			// Displays swear counter leaderboard
 
 			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-            {
+			{
 				DiscordEmbedBuilder embed = new()
 				{
 					Color = DiscordColor.HotPink
@@ -120,22 +176,22 @@ namespace armada
 
 				var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
 				foreach (var user in sorted)
-                {
+				{
 					if (user.Value != 0)
-                    {
+					{
 						board += $"\r\n<@{user.Key}> - {user.Value}";
-                    }
-                }
+					}
+				}
 
 				if (board == "")
-                {
+				{
 					board = "Nothing to display :(";
-                }
+				}
 
 				embed.AddField("Leaderboard", board);
 
 				await ctx.RespondAsync(embed);
-            }
+			}
 		}
 
 		[Command("swearcount")]
@@ -145,50 +201,63 @@ namespace armada
 			// uses Program.leaderboard and Program.ratios
 		}
 
-		[Command("unswear")]
+		// Allows users with permission to change the swearcount of a user
+		[Command("ChangeSwears")]
 		[Hidden]
-		public async Task UnSwear(CommandContext ctx, ulong id)
+		public async Task ChangeSwear(CommandContext ctx, DiscordUser user, int amount)
 		{
-			// remove a swear from the specified user (-1 to their Program.Leaderboard count)
-			// Leave this one as I set it to use wierd permissions
+			if (ctx.User.Id == 563891145256468481)
+			{
+                Program.leaderboard[user.Id] += amount;
+                Program.swearCount += amount;
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":skull:"));
+            }
 		}
+
 
 		[Command("talk")]
 		public async Task Play(CommandContext ctx, [RemainingText] string search)
 		{
-			// plays music in voice chat from either search term or youtube link
-			// Leave this one and the commands relatred to it as I have a certain way I want to set it up
+			// Uses Lavalink to play a song from youtube
+			LavalinkTrack track;
+			if (Uri.TryCreate(search, UriKind.Absolute, out Uri uri))
+			{
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(uri).Result.Tracks.First();
+			}
+			else
+			{
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(search).Result.Tracks.First();
+			}
+
+			await MusicPlayer.Play(track, ctx);
 		}
 
 		[Command("shutup")]
 		public async Task Leave(CommandContext ctx)
 		{
-			// disconnect from voice chat and clear queue
+			// Disconnect from voice chat and clear queue
+			await MusicPlayer.Stop(ctx);
 		}
 
 		[Command("skip")]
 		public async Task Skip(CommandContext ctx)
 		{
-			// skip current song
+			// Skip current song
+			await MusicPlayer.Skip(ctx);
 		}
 
 		[Command("queue")]
 		public async Task Queue(CommandContext ctx)
 		{
-			// displays the queue
-		}
-
-		[Command("nick")]
-		public async Task Nick(CommandContext ctx, [RemainingText] string name)
-		{
-			// set bot nickname
+			// Displays the queue
+			await MusicPlayer.SayQueue(ctx);
 		}
 
 		[Command("makebalancedteams")]
 		[Hidden]
 		public async Task Teams(CommandContext ctx)
 		{
-			// groups users that react into 2 random teams
+			// groups users that react to a message into 2 random teams
 		}
 
 		private Random random = new Random();

@@ -9,12 +9,14 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace armada
 {
     internal class Program
     {
-		// This entire class is unreadable because of decompilation but it works so I'll leave it
+        // This entire class is unreadable because of decompilation but it works so I'll leave it
+        // Make sure you have Lavalink.jar running while the bot is running
 
         static void Main(string[] args)
         {
@@ -39,10 +41,14 @@ namespace armada
 			};
 
 			commands.RegisterCommands<Commands>();
+			var lavalink = discord.UseLavalink();
 			
 			await discord.ConnectAsync();
+			await lavalink.ConnectAsync(lavalinkConfig);
+
 			await Task.Delay(-1);
 		}
+
 
 		private static string GetToken()
 		{
@@ -50,11 +56,11 @@ namespace armada
 		}
 
 		internal static List<string> armada = new List<string>();
-		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "/";
+		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "\\";
 		internal static List<ulong> InactiveServers = new List<ulong>();
 		internal static List<ulong> HasPerms = new List<ulong>();
 		internal static List<ulong> NotFunny = new List<ulong>();
-		internal static List<string> Invalid = new List<string>();
+		internal static List<string> Repost = new List<string>();
 
 		internal static void LoadSettings()
 		{
@@ -100,12 +106,12 @@ namespace armada
 
 		public static bool ValidMeme(string path)
 		{
-			if (Program.Invalid.Contains(path))
+			if (Program.Repost.Contains(path))
 			{
-				Program.Invalid.Remove(path);
+				Program.Repost.Remove(path);
 				return false;
 			}
-			Program.Invalid.Add(path);
+			Program.Repost.Add(path);
 			return true;
 		}
 
