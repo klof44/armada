@@ -129,6 +129,8 @@ namespace armada
                 embed.AddField("Guilds", $"In {ctx.Client.Guilds.Count} guilds");
 				embed.AddField("Memes", Directory.GetFiles(Program.assetsDir + "/bot/funny").Length.ToString());
                 embed.AddField("Ping", ctx.Client.Ping.ToString() + "ms");
+
+				await ctx.RespondAsync(embed);
             }
 		}
 
