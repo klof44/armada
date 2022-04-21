@@ -56,11 +56,10 @@ namespace armada
 
 		private static string GetToken()
 		{
-			return new StreamReader(Program.assetsDir + "bot/token").ReadLine();
+			return new StreamReader(Program.assetsDir + "bot/settings/token").ReadLine();
 		}
 
-		internal static List<string> armada = new List<string>();
-		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "\\armada\\";
+		internal static string assetsDir = Directory.GetCurrentDirectory() + "\\";
 		internal static List<ulong> InactiveServers = new List<ulong>();
 		internal static List<ulong> HasPerms = new List<ulong>();
 		internal static List<ulong> NotFunny = new List<ulong>();

@@ -7,6 +7,7 @@
     <BaseOutputPath>.\</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <OutputPath>.\</OutputPath>
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
@@ -14,10 +15,6 @@
     <Compile Remove="build\**" />
     <EmbeddedResource Remove="build\**" />
     <None Remove="build\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="bot\token" />
   </ItemGroup>
 
   <ItemGroup>
