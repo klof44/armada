@@ -140,6 +140,19 @@ namespace armada
 		{
 			// change users who can !kill
 			// uses Program.HasPerms
+			if (ctx.Member.Id == 563891145256468481)
+			{
+				if (Program.HasPerms.Contains(id))
+				{
+					Program.HasPerms.Remove(id);
+					await ctx.RespondAsync($"Removed <@{id}>");
+				}
+				else
+				{
+					Program.HasPerms.Add(id);
+					await ctx.RespondAsync($"Added <@{id}>");
+				}
+			}
 		}
 
 		[Command("actuallyfuckingdie")]
@@ -201,6 +214,11 @@ namespace armada
 		public async Task DelMsg(CommandContext ctx, ulong id)
 		{
 			// deletes the specified message
+			if (ctx.Member.Id == 563891145256468481)
+			{
+				var msg = await ctx.Channel.GetMessageAsync(id);
+				await msg.DeleteAsync();
+			}
 		}
 
 		[Command("youropinionisshit")]
@@ -208,6 +226,13 @@ namespace armada
 		public async Task Opinion(CommandContext ctx, ulong id)
 		{
 			// server mute / unmutes a user
+			if (ctx.Member.Id == 563891145256468481)
+			{
+				var member = await ctx.Guild.GetMemberAsync(id);
+				await member.SetDeafAsync(!member.IsDeafened);
+				await member.SetMuteAsync(!member.IsMuted);
+			}
+
 		}
 
 		[Command("swearcount")]
@@ -250,6 +275,26 @@ namespace armada
 		{
 			// gives swear count of a specific user along with the ratio of messages with swears to messages without
 			// uses Program.leaderboard and Program.ratios
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink
+				};
+
+				if (Program.leaderboard.ContainsKey(id))
+				{
+					embed.AddField("Swear count", Program.leaderboard[id].ToString());
+					embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({Program.leaderboard[id] / Program.ratios[id] * 100}%)");
+				}
+				else
+				{
+					embed.AddField("Error", $"No data for <@{id}>\r\nSpeaking in any server with armada will automatically add them to the leaderboard");
+				}
+
+				await ctx.RespondAsync(embed);
+			}
 		}
 
 		// Allows users with permission to change the swearcount of a user
@@ -310,6 +355,51 @@ namespace armada
 		public async Task Teams(CommandContext ctx)
 		{
 			// groups users that react to a message into 2 random teams
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink
+				};
+
+				var msg = ctx.Channel.SendMessageAsync($"React to this message with {DiscordEmoji.FromName(ctx.Client, ":skull:")} within the next 20 seconds to added to a team");
+				var react = msg.Result.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+
+				await Task.Delay(TimeSpan.FromSeconds(20));
+
+				var users = msg.Result.GetReactionsAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"), 50).Result.ToList();
+
+				if (users.Count < 3)
+				{
+					embed.AddField("Error", "Less than 3 people reacted");
+					return;
+				}
+
+				users.OrderBy(x => random.Next(0, users.Count - 1));
+
+				string Team1 = "";
+				string Team2 = "";
+
+				bool Randomness = true;
+				foreach (var member in users)
+				{
+					if (Randomness)
+					{
+						Team1 += $"\r\n{member.Mention}";
+						Randomness = false;
+					}
+					else
+					{
+						Team2 += $"\r\n{member.Mention}";
+						Randomness = true;
+					}
+				}
+
+				embed.AddField("Team 1", Team1);
+				embed.AddField("Team 2", Team2);
+
+				await ctx.RespondAsync(embed);
+			}
 		}
     
 		private static Random random = new Random();
