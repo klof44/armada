@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Entities;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Lavalink;
 using System.IO;
-
 namespace armada
 {
-	internal class Commands : BaseCommandModule
+    internal class Commands : BaseCommandModule
 	{
         // Normal user commands should have "if (!Program.InactiveServers.Contains(ctx.Guild.Id))" just in case something goes wrong and an admin can kill the bot without disconnecting from discord
         // Powerful commands like !actuallyfuckingdie and !nick can be hardcoded to only accept my user id (563891145256468481)
@@ -94,6 +90,21 @@ namespace armada
 		public async Task Funny(CommandContext ctx)
 		{
 			// posts random meme from Program.assetsDir + "/bot/funny"
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				string[] files = Directory.GetFiles(Program.assetsDir + "/bot/funny");
+				
+				var path = files[random.Next(0, files.Length)];
+				while (!Program.ValidMeme(path))
+				{
+					path = files[random.Next(0, files.Length)];
+				}
+
+				var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
+				var message = new DiscordMessageBuilder().WithFile(meme);
+				await ctx.RespondAsync(message);
+			}
 		}
 
 		[Command("info")]
@@ -134,6 +145,10 @@ namespace armada
 		public async Task ActuallyFuckingDie(CommandContext ctx)
 		{
 			// fully disconnects bot from discord
+			if (ctx.Member.Id == 563891145256468481)
+			{
+				await ctx.Client.DisconnectAsync();
+			}
 		}
 
 		[Command("kill")]
@@ -142,25 +157,19 @@ namespace armada
 		{
 			// Makes the bot ignore a guild
 			// Uses Program.InactiveServers
-		}
-
-		[Command("unkill")]
-		[Hidden]
-		public async Task Unkill(CommandContext ctx)
-		{
-			// Makes the bot no longer ignore a guild
-		}
-
-		[Command("boom")]
-		public async Task Boom(CommandContext ctx)
-		{
-			// plays vine boom in voice chat
-		}
-
-		[Command("kys")]
-		public async Task KYS(CommandContext ctx, int volume = 50)
-		{
-			// plays LTG quote in voice chat (You should kiill yourself NOW!)
+			if (Program.HasPerms.Contains(ctx.Member.Id))
+			{
+				if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+				{
+					Program.InactiveServers.Add(ctx.Guild.Id);
+					await ctx.RespondAsync($"{ctx.Member.Mention} has disabled the bot in this guild.");
+				}
+				else
+				{
+					Program.InactiveServers.Remove(ctx.Guild.Id);
+					await ctx.RespondAsync($"{ctx.Member.Mention} has enabled the bot in this guild.");
+				}
+			}
 		}
 
 		[Command("changefunny")]
@@ -169,6 +178,20 @@ namespace armada
 		{
 			// changes a users persission to use voice chat commands
 			// uses	Program.NotFunny
+
+			if (!Program.InactiveServers.Contains(ctx.Member.Id))
+			{
+				if (Program.NotFunny.Contains(id))
+				{
+					Program.NotFunny.Remove(id);
+					await ctx.RespondAsync($"Good ending {DiscordEmoji.FromName(ctx.Client, ":smiley:")}");
+				}
+				else
+				{
+					Program.NotFunny.Add(id);
+					await ctx.RespondAsync($"{ctx.Client.GetUserAsync(id).Result.Mention} fuck you {DiscordEmoji.FromName(ctx.Client, ":skull:")}");
+				}
+			}
 		}
 
 		[Command("delmsg")]
@@ -262,6 +285,7 @@ namespace armada
 		public async Task Leave(CommandContext ctx)
 		{
 			// Disconnect from voice chat and clear queue
+			await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).DisconnectAsync();
 			await MusicPlayer.Stop(ctx);
 		}
 

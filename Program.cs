@@ -24,6 +24,10 @@ namespace armada
             Program.LoadSettings();
             Program.swearCount = Program.GetSwearCout();
             Program.LoadSwears();
+			if (Directory.GetFiles(Program.assetsDir + "/bot/funny").Length == 0)
+			{
+				Console.WriteLine("WARNING!!!! NO MEMES FOUND IN " + Program.assetsDir + "/bot/funny");
+			}
             Program.MainAsync().GetAwaiter().GetResult();
         }
 
@@ -56,7 +60,7 @@ namespace armada
 		}
 
 		internal static List<string> armada = new List<string>();
-		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "\\";
+		internal static string assetsDir = Directory.GetCurrentDirectory().Remove(Directory.GetCurrentDirectory().Length - 6) + "\\armada\\";
 		internal static List<ulong> InactiveServers = new List<ulong>();
 		internal static List<ulong> HasPerms = new List<ulong>();
 		internal static List<ulong> NotFunny = new List<ulong>();
