@@ -13,9 +13,8 @@ namespace armada
 	{
 		internal MusicPlayer(ulong guild, CommandContext ctx)
 		{
-			node = ctx.Client.GetLavalink().ConnectedNodes.First().Value;
+			node = ctx.Client.GetLavalink().ConnectedNodes.FirstOrDefault().Value;
 			token = new CancellationTokenSource();
-			musicPlayers.Add(guild, this);
 		}
 
 		internal static Dictionary<ulong, MusicPlayer> musicPlayers = new Dictionary<ulong, MusicPlayer>();
@@ -49,7 +48,12 @@ namespace armada
 			{
 				musicPlayers.Add(ctx.Guild.Id, new MusicPlayer(ctx.Guild.Id, ctx));
 
-				musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				// I can't figure out why but putting a try catch here fixes the System.Private.CoreLib.dll issue
+				try
+				{
+					musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				}
+				catch { }
 
 				DiscordEmbedBuilder embed = new()
 				{
@@ -74,6 +78,7 @@ namespace armada
 			while (musicQueue.Count > 0)
 			{
 				var CurrentTrack = musicQueue.Dequeue();
+				await GuildConnection.SetVolumeAsync(50);
 				await GuildConnection.PlayAsync(CurrentTrack);
 				musicPlaying = true;
 
@@ -115,6 +120,12 @@ namespace armada
 			if (musicPlayers.ContainsKey(ctx.Guild.Id))
 			{
 				musicPlayers[ctx.Guild.Id].token.Cancel();
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Song skipped",
+				};
+				await ctx.RespondAsync(embed);
 			}
 		}
 
@@ -127,6 +138,10 @@ namespace armada
 					Color = DiscordColor.HotPink,
 					Title = "Queue",
 				};
+				if (musicPlayers[ctx.Guild.Id].musicQueue.Count <= 0)
+				{
+					embed.AddField("No tracks in queue", "Add some with `!play`");
+				}
 				foreach (var track in musicPlayers[ctx.Guild.Id].musicQueue)
 				{
 					embed.AddField($"{track.Title} - {track.Author}", track.Length.ToString());
