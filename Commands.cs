@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -104,6 +105,28 @@ namespace armada
 				var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
 				var message = new DiscordMessageBuilder().WithFile(meme);
 				await ctx.RespondAsync(message);
+			}
+		}
+
+		[Command("addmeme")]
+		public async Task AddMeme(CommandContext ctx, Uri url)
+		{
+			// Easier way for me to add memes to the funny folder
+
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
+				await channel.SendMessageAsync(url.ToString());
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "New Sumbission",
+				};
+				embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
+				embed.AddField("URL", url.ToString());
+
+				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
 			}
 		}
 

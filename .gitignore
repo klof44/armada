@@ -362,7 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /bot/token
-bot/funny/IMG_1771.png
 bot/settings/token
 .vscode/launch.json
 Microsoft.Extensions.DependencyInjection.dll
@@ -381,3 +380,4 @@ armada.runtimeconfig.dev.json
 armada.exe
 armada.dll
 armada.deps.json
+bot/funny/*

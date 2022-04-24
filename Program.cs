@@ -9,7 +9,11 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.Interactivity;
+using System.Linq;
+using System.Net;
+
 
 namespace armada
 {
@@ -58,7 +62,18 @@ namespace armada
 		{
 			return new StreamReader(Program.assetsDir + "bot/settings/token").ReadLine();
 		}
-
+		
+		static Dictionary<string, string> MediaTypes()
+		{
+			Dictionary<string, string> mediatypes = new();
+			mediatypes.Add("mp4", "video");
+			mediatypes.Add("webm", "video");
+			mediatypes.Add("png", "image");
+			mediatypes.Add("jpg", "image");
+			mediatypes.Add("jpeg", "image");
+			mediatypes.Add("gif", "image");
+			return mediatypes;
+		}
 		internal static string assetsDir = Directory.GetCurrentDirectory() + "\\";
 		internal static List<ulong> InactiveServers = new List<ulong>();
 		internal static List<ulong> HasPerms = new List<ulong>();
