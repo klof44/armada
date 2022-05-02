@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Lavalink;
 using System.IO;
+using System.Net;
 namespace armada
 {
     internal class Commands : BaseCommandModule
@@ -108,25 +109,64 @@ namespace armada
 			}
 		}
 
+		Dictionary<ulong, CommandContext> submissions = new Dictionary<ulong, CommandContext>();
 		[Command("addmeme")]
 		public async Task AddMeme(CommandContext ctx, Uri url)
 		{
 			// Easier way for me to add memes to the funny folder
 
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id) && ctx.User.Id == 563891145256468481)
 			{
-				var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
-				await channel.SendMessageAsync(url.ToString());
-
-				DiscordEmbedBuilder embed = new()
+				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
 				{
-					Color = DiscordColor.HotPink,
-					Title = "New Sumbission",
-				};
-				embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
-				embed.AddField("URL", url.ToString());
+					await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
 
-				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
+					var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
+					DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+
+					DiscordEmbedBuilder embed = new()
+					{
+						Color = DiscordColor.HotPink,
+						Title = "New Sumbission",
+					};
+					embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
+					embed.AddField("URL", url.ToString());
+
+					await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
+
+					submissions.Add(message.Id, ctx);
+				}
+				else
+				{
+					await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/`");
+				}
+			}
+		}
+
+		[Command("judge")]
+		[Hidden]
+		public async Task JudgeMeme(CommandContext ctx, ulong id, string verdict)
+		{
+			if (ctx.Channel.IsPrivate && ctx.Channel.Id == 689841330062491657)
+			{
+				if (verdict.ToLower() == "good")
+				{
+					WebClient client = new WebClient();
+					byte[] data = client.DownloadData(new Uri(submissions[id].Message.Content));
+					File.WriteAllBytes(Program.assetsDir + "/bot/funny/" + submissions[id].Message.Id + "." + ctx.Message.Content.Split(".").Last(), data);
+
+					await submissions[id].RespondAsync("Downloaded");
+				}
+				if (verdict.ToLower() == "bad")
+				{
+					await submissions[id].Message.DeleteAsync();
+				}
+				else
+				{
+					await ctx.RespondAsync("?");
+				}
+
+				submissions.Remove(id);
 			}
 		}
 
@@ -392,9 +432,9 @@ namespace armada
 
 				var users = msg.Result.GetReactionsAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"), 50).Result.ToList();
 
-				if (users.Count < 3)
+				if (users.Count < 2)
 				{
-					embed.AddField("Error", "Less than 3 people reacted");
+					embed.AddField("Error", "Less than 2 people reacted");
 					return;
 				}
 

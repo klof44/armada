@@ -9,11 +9,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using Microsoft.Extensions.Logging;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.Interactivity;
-using System.Linq;
-using System.Net;
-
+using DSharpPlus.SlashCommands;
 
 namespace armada
 {
@@ -46,12 +42,20 @@ namespace armada
 			discord.MessageCreated += async (s, e) =>
 			{
 				CheckSwear(e.Message.Content, e.Author, e);
+
+				if (e.Message.Content == "armada")
+				{
+					await e.Message.RespondAsync(DiscordEmoji.FromName(discord, ":armada:"));
+				}
 			};
 
 			commands.RegisterCommands<Commands>();
 			var lavalink = discord.UseLavalink();
+			// var slash = discord.UseSlashCommands();
 			
 			await discord.ConnectAsync();
+
+			// slash.RegisterCommands<SlashCommands>();
 			await lavalink.ConnectAsync(lavalinkConfig);
 
 			await Task.Delay(-1);

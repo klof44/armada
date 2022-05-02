@@ -29,7 +29,11 @@ namespace armada
 		{
 			if (musicPlayers.ContainsKey(ctx.Guild.Id))
 			{
-				musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				try
+				{
+					musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				}
+				catch { }
 				
 				DiscordEmbedBuilder embed = new()
 				{
