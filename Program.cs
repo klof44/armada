@@ -51,11 +51,12 @@ namespace armada
 
 			commands.RegisterCommands<Commands>();
 			var lavalink = discord.UseLavalink();
-			// var slash = discord.UseSlashCommands();
+			var slash = discord.UseSlashCommands();
 			
 			await discord.ConnectAsync();
 
-			// slash.RegisterCommands<SlashCommands>();
+			slash.RegisterCommands<SlashCommands>(913249395661750343);
+			slash.RegisterCommands<SlashCommands>(754835352950276189);
 			await lavalink.ConnectAsync(lavalinkConfig);
 
 			await Task.Delay(-1);
@@ -277,7 +278,7 @@ namespace armada
 			{
 				"!"
 			},
-			EnableDefaultHelp = false
+			EnableDefaultHelp = false,
 		});
 	}
 }

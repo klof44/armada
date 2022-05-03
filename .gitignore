@@ -381,3 +381,4 @@ armada.exe
 armada.dll
 armada.deps.json
 bot/funny/*
+bot/SwearCounter/*

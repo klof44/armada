@@ -1,26 +1,17 @@
 using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
-using DSharpPlus.Lavalink;
 using System.IO;
-using System.Net;
 using DSharpPlus.SlashCommands;
 
 namespace armada
 {
     internal class SlashCommands : ApplicationCommandModule
 	{
-        // Normal user commands should have "if (!Program.InactiveServers.Contains(ctx.Guild.Id))" just in case something goes wrong and an admin can kill the bot without disconnecting from discord
-        // Powerful commands like !actuallyfuckingdie and !nick can be hardcoded to only accept my user id (563891145256468481)
-
-        // IDEAS: Way to request for a meme to be added to the funny folder in a way that they have to be manually approved
-
         [SlashCommand("roll", "Roll as many dice as you want")]
-		public async Task Roll(InteractionContext ctx, [Option("Count", "How many dice you want to roll")] long count = 1, [Option("Sides", "How many sides are on the dice")] long sides = 20, [Option("Modifier", "Adds to the total")] long mod = 0)
+		public async Task Roll(InteractionContext ctx, [Option("Count", "How many dice you want to roll")] long count, [Option("Sides", "How many sides are on the dice")] long sides, [Option("Modifier", "Adds to the total")] long mod)
 		{
 			// dice roll command
 
@@ -54,10 +45,10 @@ namespace armada
 			}
 		}
 
-		//basic help command
 		[SlashCommand("help", "Base help command for non-slash commands")]
 		public async Task Help(InteractionContext ctx)
 		{
+			//basic help command
 			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
 			{
 				var footer = new DiscordEmbedBuilder.EmbedFooter()
@@ -90,32 +81,10 @@ namespace armada
 
 		}
 
-		[SlashCommand("funny", "funny command")]
-		public async Task Funny(InteractionContext ctx)
-		{
-			// posts random meme from Program.assetsDir + "/bot/funny"
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-			{
-				string[] files = Directory.GetFiles(Program.assetsDir + "/bot/funny");
-				
-				var path = files[random.Next(0, files.Length)];
-				while (!Program.ValidMeme(path))
-				{
-					path = files[random.Next(0, files.Length)];
-				}
-
-				var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
-				var message = new DiscordInteractionResponseBuilder().AddFile(meme);
-				await ctx.CreateResponseAsync(message);
-			}
-		}
-
 		[SlashCommand("info", "help but more info")]
 		public async Task Info(InteractionContext ctx)
 		{
 			// Help command but more info
-
 			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
 			{
                 DiscordEmbedBuilder embed = new()
@@ -138,64 +107,85 @@ namespace armada
             }
 		}
 
-		[SlashCommand("swearcount", "Shows the swearcount leaderboard")]
-		public async Task Swear(InteractionContext ctx)
+		[SlashCommand("swearcount", "Shows swear leaderboard or swearcount of a specific user")]
+		public async Task Swears(InteractionContext ctx, [Option("User", "Who's stats you want to see")] DiscordUser user = null)
 		{
-			// Displays swear counter leaderboard
-
+			// Get either the swear leaderboard or a user's swear count and ratio
 			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
 			{
-				DiscordEmbedBuilder embed = new()
+				if (user != null)
 				{
-					Color = DiscordColor.HotPink
-				};
-				embed.AddField("Total", Program.swearCount.ToString());
+					ulong id = user.Id;
 
-				string board = "";
-
-				var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
-				foreach (var user in sorted)
-				{
-					if (user.Value != 0)
+					DiscordEmbedBuilder embed = new()
 					{
-						board += $"\r\n<@{user.Key}> - {user.Value}";
+						Color = DiscordColor.HotPink
+					};
+
+					if (Program.leaderboard.ContainsKey(id))
+					{
+						embed.AddField("Swear count", Program.leaderboard[id].ToString());
+						embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({Program.leaderboard[id] / Program.ratios[id] * 100}%)");
 					}
-				}
+					else
+					{
+						embed.AddField("Error", $"No data for <@{id}>\r\nSpeaking in any server with armada will automatically add them to the leaderboard");
+					}
 
-				if (board == "")
-				{
-					board = "Nothing to display :(";
-				}
-
-				embed.AddField("Leaderboard", board);
-
-				await ctx.CreateResponseAsync(embed);
-			}
-		}
-
-		[SlashCommand("swearcount", "Gets the swear count of a specific user")]
-		public async Task Swears(InteractionContext ctx, [Option("User", "Who's stats you want to see")] DiscordUser user)
-		{
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-			{
-                ulong id = user.Id;
-
-				DiscordEmbedBuilder embed = new()
-				{
-					Color = DiscordColor.HotPink
-				};
-
-				if (Program.leaderboard.ContainsKey(id))
-				{
-					embed.AddField("Swear count", Program.leaderboard[id].ToString());
-					embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({Program.leaderboard[id] / Program.ratios[id] * 100}%)");
+					await ctx.CreateResponseAsync(embed);	
 				}
 				else
 				{
-					embed.AddField("Error", $"No data for <@{id}>\r\nSpeaking in any server with armada will automatically add them to the leaderboard");
+					if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+					{
+						DiscordEmbedBuilder embed = new()
+						{
+							Color = DiscordColor.HotPink
+						};
+						embed.AddField("Total", Program.swearCount.ToString());
+
+						string board = "";
+
+						var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
+						foreach (var users in sorted)
+						{
+							if (users.Value != 0)
+							{
+								board += $"\r\n<@{users.Key}> - {users.Value}";
+							}
+						}
+
+						if (board == "")
+						{
+							board = "Nothing to display :(";
+						}
+
+						embed.AddField("Leaderboard", board);
+
+						await ctx.CreateResponseAsync(embed);
+					}
 				}
 
-				await ctx.CreateResponseAsync(embed);
+			}
+		}
+		
+		[SlashCommand("funny", "funny command")]
+		public async Task Funny(InteractionContext ctx)
+		{
+			// posts random meme from Program.assetsDir + "/bot/funny"
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			{
+				string[] files = Directory.GetFiles(Program.assetsDir + "/bot/funny");
+				
+				var path = files[random.Next(0, files.Length)];
+				while (!Program.ValidMeme(path))
+				{
+					path = files[random.Next(0, files.Length)];
+				}
+
+				var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
+				var message = new DiscordInteractionResponseBuilder().AddFile(meme);
+				await ctx.CreateResponseAsync(message);
 			}
 		}
 		private static Random random = new Random();
