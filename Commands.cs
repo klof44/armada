@@ -117,7 +117,7 @@ namespace armada
 
 			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
 			{
-				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
+				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/") || url.ToString().StartsWith("https://media.discordapp.com/attachments/"))
 				{
 					await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
 
@@ -138,7 +138,7 @@ namespace armada
 				}
 				else
 				{
-					await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/`");
+					await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/` or `https://media.discordapp.com/attachments/`");
 				}
 			}
 		}
@@ -181,12 +181,21 @@ namespace armada
 		{
 			if (ctx.Channel.IsPrivate && ctx.User.Id == 563891145256468481)
 			{
+				Uri url = new Uri("https://cdn.discordapp.com/attachments/");
+				if (submissions[id].Message.Embeds.First() != null)
+				{
+					url = new Uri(submissions[id].Message.Embeds.First().Url.ToString());
+				}
+				else
+				{
+					url = new Uri(submissions[id].Message.Attachments.First().Url);
+				}
 				try
 				{
 					if (verdict.ToLower() == "good")
 					{
 						WebClient client = new WebClient();
-						byte[] data = client.DownloadData(submissions[id].Message.Embeds.First().Url);
+						byte[] data = client.DownloadData(url);
 						File.WriteAllBytes(Program.assetsDir + "/bot/funny/" + id + "." + submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last(), data);
 
 						await submissions[id].RespondAsync($"Downloaded as {id}.{submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last()}");
