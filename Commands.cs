@@ -115,7 +115,7 @@ namespace armada
 		{
 			// Easier way for me to add memes to the funny folder
 
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id) && ctx.User.Id == 563891145256468481)
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
 			{
 				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
 				{
@@ -142,31 +142,69 @@ namespace armada
 				}
 			}
 		}
+		[Command("addmeme")]
+		public async Task MemeNoLink(CommandContext ctx)
+		{
+			var file = ctx.Message.Attachments.FirstOrDefault();
+			var url = file.Url;
+			if (!Program.InactiveServers.Contains(ctx.Guild.Id) && Program.MediaTypes().ContainsKey(file.FileName.Split(".").Last()))
+			{
+				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
+				{
+					await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+
+					var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
+					DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+
+					DiscordEmbedBuilder embed = new()
+					{
+						Color = DiscordColor.HotPink,
+						Title = "New Sumbission",
+					};
+					embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
+					embed.AddField("URL", url.ToString());
+
+					await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
+
+					submissions.Add(message.Id, ctx);
+				}
+				else
+				{
+					await ctx.RespondAsync("Please use a `.mp4`, `.gif`, `.webm`, `.png`, or `.jpg` file");
+				}
+			}
+		}
 
 		[Command("judge")]
 		[Hidden]
 		public async Task JudgeMeme(CommandContext ctx, ulong id, string verdict)
 		{
-			if (ctx.Channel.IsPrivate && ctx.Channel.Id == 689841330062491657)
+			if (ctx.Channel.IsPrivate && ctx.User.Id == 563891145256468481)
 			{
-				if (verdict.ToLower() == "good")
+				try
 				{
-					WebClient client = new WebClient();
-					byte[] data = client.DownloadData(new Uri(submissions[id].Message.Content));
-					File.WriteAllBytes(Program.assetsDir + "/bot/funny/" + submissions[id].Message.Id + "." + ctx.Message.Content.Split(".").Last(), data);
+					if (verdict.ToLower() == "good")
+					{
+						WebClient client = new WebClient();
+						byte[] data = client.DownloadData(submissions[id].Message.Embeds.First().Url);
+						File.WriteAllBytes(Program.assetsDir + "/bot/funny/" + id + "." + submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last(), data);
 
-					await submissions[id].RespondAsync("Downloaded");
+						await submissions[id].RespondAsync($"Downloaded as {id}.{submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last()}");
+						submissions.Remove(id);
+					}
+					if (verdict.ToLower() == "bad")
+					{
+						await ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result.CreateDmChannelAsync().Result.GetMessageAsync(id).Result.DeleteAsync();
+						await submissions[id].RespondAsync("Denied");
+						submissions.Remove(id);
+					}
 				}
-				if (verdict.ToLower() == "bad")
+				catch (Exception ex)
 				{
-					await submissions[id].Message.DeleteAsync();
+					Console.WriteLine(ex.Message);
+					Console.WriteLine(ex.InnerException);
+					Console.WriteLine(ex.StackTrace);
 				}
-				else
-				{
-					await ctx.RespondAsync("?");
-				}
-
-				submissions.Remove(id);
 			}
 		}
 

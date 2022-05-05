@@ -381,4 +381,6 @@ armada.exe
 armada.dll
 armada.deps.json
 bot/funny/*
-bot/SwearCounter/*
+bot/SwearCounter/Count
+bot/SwearCounter/leaderboard.txt
+bot/SwearCounter/ratio.txt

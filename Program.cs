@@ -53,10 +53,16 @@ namespace armada
 			var lavalink = discord.UseLavalink();
 			var slash = discord.UseSlashCommands();
 			
-			await discord.ConnectAsync();
-
 			slash.RegisterCommands<SlashCommands>(913249395661750343);
 			slash.RegisterCommands<SlashCommands>(754835352950276189);
+
+			await discord.ConnectAsync();
+
+			discord.Ready += async (s, e) =>
+			{
+				await discord.UpdateStatusAsync(new DiscordActivity("with YOUR balls", ActivityType.Playing));
+			};
+
 			await lavalink.ConnectAsync(lavalinkConfig);
 
 			await Task.Delay(-1);
@@ -68,7 +74,7 @@ namespace armada
 			return new StreamReader(Program.assetsDir + "bot/settings/token").ReadLine();
 		}
 		
-		static Dictionary<string, string> MediaTypes()
+		public static Dictionary<string, string> MediaTypes()
 		{
 			Dictionary<string, string> mediatypes = new();
 			mediatypes.Add("mp4", "video");
