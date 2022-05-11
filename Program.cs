@@ -65,13 +65,16 @@ namespace armada
 
 			discord.PresenceUpdated += async (s, e) =>
 			{
-				if (discord.GetGuildAsync(754835352950276189).Result.Members.ContainsKey(e.User.Id) && e.Activity.ActivityType == ActivityType.Playing && e.Activity.Name.ToLower().StartsWith("league of legends"))
+				if (discord.GetGuildAsync(754835352950276189).Result.Members.ContainsKey(e.User.Id) && e.Activity != null)
 				{
-					try
+					if (e.Activity.ActivityType == ActivityType.Playing && e.Activity.Name.ToLower().StartsWith("league of legends"))
 					{
-						await discord.GetGuildAsync(754835352950276189).Result.GetMemberAsync(e.User.Id).Result.BanAsync(0, "Playing League of Legends");
+						try
+						{
+							await discord.GetGuildAsync(754835352950276189).Result.GetMemberAsync(e.User.Id).Result.BanAsync(0, "Playing League of Legends");
+						}
+						catch { }
 					}
-					catch { }
 				}
 			};
 
