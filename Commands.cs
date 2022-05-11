@@ -186,9 +186,13 @@ namespace armada
 				{
 					url = new Uri(submissions[id].Message.Embeds.First().Url.ToString());
 				}
-				else
+				else if (submissions[id].Message.Attachments.First() != null)
 				{
 					url = new Uri(submissions[id].Message.Attachments.First().Url);
+				}
+				else
+				{
+					url = new Uri(submissions[id].Message.Content.Remove(0, 8));
 				}
 				try
 				{

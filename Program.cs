@@ -50,7 +50,7 @@ namespace armada
 			};
 
 			commands.RegisterCommands<Commands>();
-			var lavalink = discord.UseLavalink();
+			//var lavalink = discord.UseLavalink();
 			var slash = discord.UseSlashCommands();
 			
 			slash.RegisterCommands<SlashCommands>(913249395661750343);
@@ -63,7 +63,19 @@ namespace armada
 				await discord.UpdateStatusAsync(new DiscordActivity("with YOUR balls", ActivityType.Playing));
 			};
 
-			await lavalink.ConnectAsync(lavalinkConfig);
+			discord.PresenceUpdated += async (s, e) =>
+			{
+				if (discord.GetGuildAsync(754835352950276189).Result.Members.ContainsKey(e.User.Id) && e.Activity.ActivityType == ActivityType.Playing && e.Activity.Name.ToLower().StartsWith("league of legends"))
+				{
+					try
+					{
+						await discord.GetGuildAsync(754835352950276189).Result.GetMemberAsync(e.User.Id).Result.BanAsync(0, "Playing League of Legends");
+					}
+					catch { }
+				}
+			};
+
+			//await lavalink.ConnectAsync(lavalinkConfig);
 
 			await Task.Delay(-1);
 		}
