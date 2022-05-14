@@ -384,3 +384,4 @@ bot/funny/*
 bot/SwearCounter/Count
 bot/SwearCounter/leaderboard.txt
 bot/SwearCounter/ratio.txt
+DSharpPlus.SlashCommands.dll

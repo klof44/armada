@@ -400,7 +400,7 @@ namespace armada
 				if (Program.leaderboard.ContainsKey(id))
 				{
 					embed.AddField("Swear count", Program.leaderboard[id].ToString());
-					embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({Program.leaderboard[id] / Program.ratios[id] * 100}%)");
+					embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({ Math.Round((double) Program.leaderboard[id] / (double) Program.ratios[id] * 100, 2)}%)");
 				}
 				else
 				{

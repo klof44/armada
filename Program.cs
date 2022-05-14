@@ -50,7 +50,9 @@ namespace armada
 			};
 
 			commands.RegisterCommands<Commands>();
-			//var lavalink = discord.UseLavalink();
+		
+			var lavalink = discord.UseLavalink();
+
 			var slash = discord.UseSlashCommands();
 			
 			slash.RegisterCommands<SlashCommands>(913249395661750343);
@@ -78,7 +80,7 @@ namespace armada
 				}
 			};
 
-			//await lavalink.ConnectAsync(lavalinkConfig);
+			await lavalink.ConnectAsync(lavalinkConfig);
 
 			await Task.Delay(-1);
 		}
@@ -105,6 +107,7 @@ namespace armada
 		internal static List<ulong> HasPerms = new List<ulong>();
 		internal static List<ulong> NotFunny = new List<ulong>();
 		internal static List<string> Repost = new List<string>();
+		public static ulong klofId = 563891145256468481;
 
 		internal static void LoadSettings()
 		{
