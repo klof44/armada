@@ -10,16 +10,16 @@
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="build\**"/>
-    <EmbeddedResource Remove="build\**"/>
-    <None Remove="build\**"/>
+    <Compile Remove="build\**" />
+    <EmbeddedResource Remove="build\**" />
+    <None Remove="build\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.2.0"/>
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0"/>
-    <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0"/>
-    <PackageReference Include="DSharpPlus.Rest" Version="4.2.0"/>
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0"/>
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0"/>
+    <PackageReference Include="DSharpPlus" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.Rest" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0" />
   </ItemGroup>
 </Project>
