@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using System.Linq;
 using System.IO;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.Lavalink;
 
 namespace armada
 {
@@ -189,5 +190,68 @@ namespace armada
 			}
 		}
 		private static Random random = new Random();
+
+		[SlashCommand("talk", "Music command")]
+		public async Task Play(InteractionContext ctx, [Option("search", "The name or url of the song")] string search)
+		{
+			// Uses Lavalink to play a song from youtube
+			LavalinkTrack track;
+			if (Uri.TryCreate(search, UriKind.Absolute, out Uri uri))
+			{
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(uri).Result.Tracks.First();
+			}
+			else
+			{
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(search).Result.Tracks.First();
+			}
+
+
+			await MusicPlayer.Play(track, ctx);
+		}
+
+		[SlashCommand("shutup", "disconects from voice channel")]
+		public async Task Leave(InteractionContext ctx)
+		{
+			// Disconnect from voice chat and clear queue
+			await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).DisconnectAsync();
+			await MusicPlayer.Stop(ctx);
+		}
+
+		[SlashCommand("skip", "skip current track")]
+		public async Task Skip(InteractionContext ctx)
+		{
+			// Skip current song
+			await MusicPlayer.Skip(ctx);
+		}
+
+		[SlashCommand("queue", "show queue")]
+		public async Task Queue(InteractionContext ctx)
+		{
+			// Displays the queue
+			await MusicPlayer.SayQueue(ctx);
+		}
+	}
+
+	public class RequireUserIdAttribute : SlashCheckBaseAttribute
+	{
+		public ulong UserId;
+
+		public RequireUserIdAttribute(ulong userId)
+		{
+			this.UserId = userId;
+		}
+		public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
+		{
+			if (ctx.User.Id == UserId)
+			{
+				await ctx.CreateResponseAsync(":)");
+				return true;
+			}
+			else
+			{
+				await ctx.CreateResponseAsync($"{DiscordEmoji.FromName(ctx.Client, ":skull:")}");
+				return false;
+			}
+		}
 	}
 }

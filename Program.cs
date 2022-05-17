@@ -62,22 +62,7 @@ namespace armada
 
 			discord.Ready += async (s, e) =>
 			{
-				await discord.UpdateStatusAsync(new DiscordActivity("with YOUR balls", ActivityType.Playing));
-			};
-
-			discord.PresenceUpdated += async (s, e) =>
-			{
-				if (discord.GetGuildAsync(754835352950276189).Result.Members.ContainsKey(e.User.Id) && e.Activity != null)
-				{
-					if (e.Activity.ActivityType == ActivityType.Playing && e.Activity.Name.ToLower().StartsWith("league of legends"))
-					{
-						try
-						{
-							await discord.GetGuildAsync(754835352950276189).Result.GetMemberAsync(e.User.Id).Result.BanAsync(0, "Playing League of Legends");
-						}
-						catch { }
-					}
-				}
+				await discord.UpdateStatusAsync(new DiscordActivity("Ask klof44#6612 to anable slash commands in your server", ActivityType.Playing));
 			};
 
 			await lavalink.ConnectAsync(lavalinkConfig);
