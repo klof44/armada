@@ -230,12 +230,6 @@ namespace armada
 			// Displays the queue
 			await MusicPlayer.SayQueue(ctx);
 		}
-
-		[SlashCommand("score", "osu! score info")]
-		public async Task Score(InteractionContext ctx)
-		{
-			
-		}
 	}
 
 	public class RequireUserIdAttribute : SlashCheckBaseAttribute

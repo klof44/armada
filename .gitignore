@@ -380,8 +380,5 @@ armada.runtimeconfig.dev.json
 armada.exe
 armada.dll
 armada.deps.json
-bot/funny/*
-bot/SwearCounter/Count
-bot/SwearCounter/leaderboard.txt
-bot/SwearCounter/ratio.txt
+bot/*
 DSharpPlus.SlashCommands.dll
