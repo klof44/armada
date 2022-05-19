@@ -2,4 +2,5 @@
 
 A stupid discord bot that does random shit  
   
-If you want to run the bot make sure you have your bot token in bot/settings/token and memes in bot/funny  
+Don't even try to run this bot yourself as it is unstable and constantly changing.  
+This repo is mostly for issues and having a backup of my code.  
