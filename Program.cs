@@ -62,7 +62,7 @@ namespace armada
 
 			discord.Ready += async (s, e) =>
 			{
-				await discord.UpdateStatusAsync(new DiscordActivity("Ask klof44#6612 to anable slash commands in your server", ActivityType.Playing));
+				await discord.UpdateStatusAsync(new DiscordActivity("YOUR balls", ActivityType.Playing));
 			};
 
 			await lavalink.ConnectAsync(lavalinkConfig);
