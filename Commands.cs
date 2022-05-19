@@ -17,6 +17,7 @@ namespace armada
 
         // IDEAS: Way to request for a meme to be added to the funny folder in a way that they have to be manually approved
 
+		private static Random random = new Random();
         [Command("roll")]
 		public async Task Roll(CommandContext ctx, int count, int sides, int mod = 0)
 		{
@@ -515,7 +516,6 @@ namespace armada
 				await ctx.RespondAsync(embed);
 			}
 		}
-    
-		private static Random random = new Random();
+ 
 	}
 }
