@@ -35,12 +35,13 @@ namespace armada
 		{
 			if (musicPlayers.ContainsKey(ctx.Guild.Id))
 			{
+
 				try
 				{
 					musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
 				}
 				catch { }
-				
+
 				DiscordEmbedBuilder embed = new()
 				{
 					Color = DiscordColor.HotPink,
@@ -51,7 +52,7 @@ namespace armada
 
 				if (!musicPlayers[ctx.Guild.Id].musicPlaying)
 				{
-					await musicPlayers[ctx.Guild.Id].Start(track, ctx);
+					await musicPlayers[ctx.Guild.Id].Start(ctx);
 				}
 			}
 			else
@@ -73,12 +74,63 @@ namespace armada
 				embed.AddField($"{track.Title} - {track.Author}", track.Length.ToString());
 				await ctx.RespondAsync(embed);
 
-
-				await musicPlayers[ctx.Guild.Id].Start(track, ctx);
+				await musicPlayers[ctx.Guild.Id].Start(ctx);
 			}
 		}
 
-		private async Task Start(LavalinkTrack track, CommandContext ctx)
+		public static async Task PlayPlaylist(List<LavalinkTrack> playlist, CommandContext ctx)
+		{
+			if (musicPlayers.ContainsKey(ctx.Guild.Id))
+			{
+
+				foreach (var track in playlist)
+				{
+					try
+					{
+						musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+					}
+					catch { }
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Added Playlist to Queue",
+				};
+				embed.AddField($"Queued {playlist.Count} tracks", "Use !queue to view queue");
+				await ctx.RespondAsync(embed);
+
+				if (!musicPlayers[ctx.Guild.Id].musicPlaying)
+				{
+					await musicPlayers[ctx.Guild.Id].Start(ctx);
+				}
+			}
+			else
+			{
+				musicPlayers.Add(ctx.Guild.Id, new MusicPlayer(ctx.Guild.Id, ctx));
+
+				foreach (var track in playlist)
+				{
+					try
+					{
+						musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+					}
+					catch { }
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Added Playlist to Queue",
+				};
+				embed.AddField($"Queued {playlist.Count} tracks", "Use !queue to view queue");
+				await ctx.RespondAsync(embed);
+
+				await musicPlayers[ctx.Guild.Id].Start(ctx);
+			}
+		}
+
+		private async Task Start(CommandContext ctx)
 		{
 			if (!musicPlaying)
 			{
@@ -119,12 +171,8 @@ namespace armada
 			}
 		}
 
-		public static async Task AddToQueue(LavalinkTrack track, CommandContext ctx)
-		{
-			musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
-			await Play(track, ctx);
-		}
 
+		
 		public static async Task Skip(CommandContext ctx)
 		{
 			if (musicPlayers.ContainsKey(ctx.Guild.Id))
@@ -160,10 +208,10 @@ namespace armada
 			}
 		}
 
-		// InteractionContext versions
+		// InteractionContext versions for slash commands
 
-			public static async Task Play(LavalinkTrack track, InteractionContext ctx)
-			{
+		public static async Task Play(LavalinkTrack track, InteractionContext ctx)
+		{
 			if (musicPlayers.ContainsKey(ctx.Guild.Id))
 				{
 				try
@@ -182,7 +230,7 @@ namespace armada
 
 				if (!musicPlayers[ctx.Guild.Id].musicPlaying)
 				{
-					await musicPlayers[ctx.Guild.Id].Start(track, ctx);
+					await musicPlayers[ctx.Guild.Id].Start(ctx);
 				}
 			}
 			else
@@ -205,11 +253,63 @@ namespace armada
 				await ctx.CreateResponseAsync(embed);
 
 
-				await musicPlayers[ctx.Guild.Id].Start(track, ctx);
+				await musicPlayers[ctx.Guild.Id].Start(ctx);
 			}
 		}
 
-		private async Task Start(LavalinkTrack track, InteractionContext ctx)
+		public static async Task PlayPlaylist(List<LavalinkTrack> playlist, InteractionContext ctx)
+		{
+			if (musicPlayers.ContainsKey(ctx.Guild.Id))
+			{
+
+				foreach (var track in playlist)
+				{
+					try
+					{
+						musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+					}
+					catch { }
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Added Playlist to Queue",
+				};
+				embed.AddField($"Queued {playlist.Count} tracks", "Use !queue to view queue");
+				await ctx.CreateResponseAsync(embed);
+
+				if (!musicPlayers[ctx.Guild.Id].musicPlaying)
+				{
+					await musicPlayers[ctx.Guild.Id].Start(ctx);
+				}
+			}
+			else
+			{
+				musicPlayers.Add(ctx.Guild.Id, new MusicPlayer(ctx.Guild.Id, ctx));
+
+				foreach (var track in playlist)
+				{
+					try
+					{
+						musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+					}
+					catch { }
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Added Playlist to Queue",
+				};
+				embed.AddField($"Queued {playlist.Count} tracks", "Use !queue to view queue");
+				await ctx.CreateResponseAsync(embed);
+
+				await musicPlayers[ctx.Guild.Id].Start(ctx);
+			}
+		}
+
+		private async Task Start(InteractionContext ctx)
 		{
 			if (!musicPlaying)
 			{

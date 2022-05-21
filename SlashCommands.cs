@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.Lavalink;
+using System.Collections.Generic;
 
 namespace armada
 {
@@ -195,18 +196,29 @@ namespace armada
 		public async Task Play(InteractionContext ctx, [Option("search", "The name or url of the song")] string search)
 		{
 			// Uses Lavalink to play a song from youtube
-			LavalinkTrack track;
+			LavalinkLoadResult track;
 			if (Uri.TryCreate(search, UriKind.Absolute, out Uri uri))
 			{
-				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(uri).Result.Tracks.First();
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(uri).Result;
+				if (track.LoadResultType == LavalinkLoadResultType.PlaylistLoaded)
+				{
+					List<LavalinkTrack> playlist = new();
+					foreach (var tracks in track.Tracks)
+					{
+						playlist.Add(tracks);
+					}
+
+					await MusicPlayer.PlayPlaylist(playlist, ctx);
+					return;
+				}
 			}
 			else
 			{
-				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(search).Result.Tracks.First();
+				track = ctx.Client.GetLavalink().ConnectedNodes.Values.First().Rest.GetTracksAsync(search).Result;
 			}
 
 
-			await MusicPlayer.Play(track, ctx);
+			await MusicPlayer.Play(track.Tracks.First(), ctx);
 		}
 
 		[SlashCommand("shutup", "disconects from voice channel")]
