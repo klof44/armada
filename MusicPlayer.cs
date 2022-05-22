@@ -152,7 +152,12 @@ namespace armada
 				embed.AddField($"{CurrentTrack.Title} - {CurrentTrack.Author}", CurrentTrack.Length.ToString());
 				await ctx.RespondAsync(embed);
 
-				await Task.Delay(CurrentTrack.Length + TimeSpan.FromSeconds(3), token.Token);
+				this.token = new CancellationTokenSource();
+
+				try 
+				{
+					await Task.Delay(CurrentTrack.Length + TimeSpan.FromSeconds(3), token.Token);
+				} catch { }
 			}
 			musicPlaying = false;
 
@@ -267,8 +272,7 @@ namespace armada
 					try
 					{
 						musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
-					}
-					catch { }
+					}	catch { }
 				}
 
 				DiscordEmbedBuilder embed = new()
@@ -331,7 +335,13 @@ namespace armada
 				embed.AddField($"{CurrentTrack.Title} - {CurrentTrack.Author}", CurrentTrack.Length.ToString());
 				await ctx.Channel.SendMessageAsync(embed);
 
-				await Task.Delay(CurrentTrack.Length + TimeSpan.FromSeconds(1), token.Token);
+				this.token = new CancellationTokenSource();
+
+				try
+				{
+					await Task.Delay(CurrentTrack.Length + TimeSpan.FromSeconds(1), token.Token);
+				}	catch { }
+
 			}
 			musicPlaying = false;
 
