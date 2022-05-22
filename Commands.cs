@@ -13,7 +13,6 @@ namespace armada
     internal class Commands : BaseCommandModule
 	{
         // Normal user commands should have "if (!Program.InactiveServers.Contains(ctx.Guild.Id))" just in case something goes wrong and an admin can kill the bot without disconnecting from discord
-        // Powerful commands like !actuallyfuckingdie and !nick can be hardcoded to only accept my user id (563891145256468481)
 
         // IDEAS: Way to request for a meme to be added to the funny folder in a way that they have to be manually approved
 
@@ -22,70 +21,63 @@ namespace armada
 		public async Task Roll(CommandContext ctx, int count, int sides, int mod = 0)
 		{
 			// dice roll command
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             {
-                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                {
-					Color = DiscordColor.HotPink,
-                    Title = $"{count}d{sides} + {mod}",
-                };
+				Color = DiscordColor.HotPink,
+                Title = $"{count}d{sides} + {mod}",
+            };
 
-                long total = 0;
-                string rolls = "";
-                for (int i = 0; i < count; i++)
-                {
-                    int roll = random.Next(1, sides + 1);
-                    rolls += $"{roll}{DiscordEmoji.FromName(ctx.Client, ":black_small_square:")}";
-                    total += roll;
-                }
+            long total = 0;
+            string rolls = "";
+            for (int i = 0; i < count; i++)
+            {
+                int roll = random.Next(1, sides + 1);
+                rolls += $"{roll}{DiscordEmoji.FromName(ctx.Client, ":black_small_square:")}";
+                total += roll;
+            }
 
-                if (mod != 0)
-                {
-					embed.AddField($"Total: {total}", $"{rolls}");
-                }
-				else
-                {
-					embed.AddField($"Total: {total + mod}", $"{rolls}");
-				}
-
-				await ctx.RespondAsync(embed);
+            if (mod != 0)
+            {
+				embed.AddField($"Total: {total}", $"{rolls}");
+            }
+			else
+            {
+				embed.AddField($"Total: {total + mod}", $"{rolls}");
 			}
+
+			await ctx.RespondAsync(embed);
 		}
 
 		//basic help command
 		[Command("help")]
 		public async Task Help(CommandContext ctx)
 		{
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			var footer = new DiscordEmbedBuilder.EmbedFooter()
 			{
-				var footer = new DiscordEmbedBuilder.EmbedFooter()
-				{
-					Text = "Bot by klof44",
-					IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
-				};
+				Text = "Bot by klof44",
+				IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
+			};
 				
-				DiscordEmbedBuilder embed = new()
-				{
-					Color = DiscordColor.HotPink,
-					Title = "Help",
-					Footer = footer,
-				};
+			DiscordEmbedBuilder embed = new()
+			{
+				Color = DiscordColor.HotPink,
+				Title = "Help",
+				Footer = footer,
+			};
 
-				string CommandList = "";
-				foreach (var cmd in ctx.CommandsNext.RegisteredCommands)
+			string CommandList = "";
+			foreach (var cmd in ctx.CommandsNext.RegisteredCommands)
+			{
+				if (!cmd.Value.IsHidden)
 				{
-					if (!cmd.Value.IsHidden)
-					{
 						CommandList += $" `{cmd.Key}` ";
-					}
 				}
-
-				embed.AddField("Commands", CommandList);
-				embed.AddField("Huh?", "For more help contact <@563891145256468481>");
-
-				await ctx.RespondAsync(embed);
 			}
+
+			embed.AddField("Commands", CommandList);
+			embed.AddField("Huh?", "For more help contact <@563891145256468481>");
+
+			await ctx.RespondAsync(embed);
 
 		}
 
@@ -93,21 +85,17 @@ namespace armada
 		public async Task Funny(CommandContext ctx)
 		{
 			// posts random meme from Program.assetsDir + "/bot/funny"
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-			{
-				string[] files = Directory.GetFiles(Program.assetsDir + "/bot/funny");
+			string[] files = Directory.GetFiles(Program.assetsDir + "/bot/funny");
 				
-				var path = files[random.Next(0, files.Length)];
-				while (!Program.ValidMeme(path))
-				{
-					path = files[random.Next(0, files.Length)];
-				}
-
-				var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
-				var message = new DiscordMessageBuilder().WithFile(meme);
-				await ctx.RespondAsync(message);
+			var path = files[random.Next(0, files.Length)];
+			while (!Program.ValidMeme(path))
+			{
+				path = files[random.Next(0, files.Length)];
 			}
+
+			var meme = new FileStream(path, FileMode.Open, FileAccess.Read);
+			var message = new DiscordMessageBuilder().WithFile(meme);
+			await ctx.RespondAsync(message);
 		}
 
 		Dictionary<ulong, CommandContext> submissions = new Dictionary<ulong, CommandContext>();
@@ -115,32 +103,28 @@ namespace armada
 		public async Task AddMeme(CommandContext ctx, Uri url)
 		{
 			// Easier way for me to add memes to the funny folder
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/") || url.ToString().StartsWith("https://media.discordapp.com/attachments/"))
 			{
-				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/") || url.ToString().StartsWith("https://media.discordapp.com/attachments/"))
+				await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+
+				var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
+				DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+
+				DiscordEmbedBuilder embed = new()
 				{
-					await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+					Color = DiscordColor.HotPink,
+					Title = "New Sumbission",
+				};
+				embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
+				embed.AddField("URL", url.ToString());
 
-					var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
-					DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
 
-					DiscordEmbedBuilder embed = new()
-					{
-						Color = DiscordColor.HotPink,
-						Title = "New Sumbission",
-					};
-					embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
-					embed.AddField("URL", url.ToString());
-
-					await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
-
-					submissions.Add(message.Id, ctx);
+				submissions.Add(message.Id, ctx);
 				}
-				else
-				{
-					await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/` or `https://media.discordapp.com/attachments/`");
-				}
+			else
+			{
+				await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/` or `https://media.discordapp.com/attachments/`");
 			}
 		}
 		[Command("addmeme")]
@@ -148,31 +132,28 @@ namespace armada
 		{
 			var file = ctx.Message.Attachments.FirstOrDefault();
 			var url = file.Url;
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id) && Program.MediaTypes().ContainsKey(file.FileName.Split(".").Last()))
+			if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
 			{
-				if (url.ToString().StartsWith("https://cdn.discordapp.com/attachments/"))
+				await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+
+				var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
+				DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+
+				DiscordEmbedBuilder embed = new()
 				{
-					await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+					Color = DiscordColor.HotPink,
+					Title = "New Sumbission",
+				};
+				embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
+				embed.AddField("URL", url.ToString());
 
-					var channel = ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result;
-					DiscordMessage message = await channel.SendMessageAsync(url.ToString());
+				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
 
-					DiscordEmbedBuilder embed = new()
-					{
-						Color = DiscordColor.HotPink,
-						Title = "New Sumbission",
-					};
-					embed.AddField("Submitted by", $"<@{ctx.Member.Id}>");
-					embed.AddField("URL", url.ToString());
-
-					await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
-
-					submissions.Add(message.Id, ctx);
-				}
-				else
-				{
-					await ctx.RespondAsync("Please use a `.mp4`, `.gif`, `.webm`, `.png`, or `.jpg` file");
-				}
+				submissions.Add(message.Id, ctx);
+			}
+			else
+			{
+				await ctx.RespondAsync("Please use a `.mp4`, `.gif`, `.webm`, `.png`, or `.jpg` file");
 			}
 		}
 
@@ -226,48 +207,23 @@ namespace armada
 		public async Task Info(CommandContext ctx)
 		{
 			// Help command but more info
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-			{
-                DiscordEmbedBuilder embed = new()
+            DiscordEmbedBuilder embed = new()
+        	{
+                Color = DiscordColor.HotPink,
+                Title = "Info",
+                Footer = new DiscordEmbedBuilder.EmbedFooter()
                 {
-                    Color = DiscordColor.HotPink,
-                    Title = "Info",
-                    Footer = new DiscordEmbedBuilder.EmbedFooter()
-                    {
-                        Text = "Bot by klof44",
-                        IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
-                    },
-                };
+                    Text = "Bot by klof44",
+                     IconUrl = ctx.Client.GetUserAsync(563891145256468481).Result.AvatarUrl
+                },
+            };
 
-				embed.AddField("Commands count", ctx.CommandsNext.RegisteredCommands.Count.ToString());
-                embed.AddField("Guilds", $"In {ctx.Client.Guilds.Count} guilds");
-				embed.AddField("Memes", Directory.GetFiles(Program.assetsDir + "/bot/funny").Length.ToString());
-                embed.AddField("Ping", ctx.Client.Ping.ToString() + "ms");
+			embed.AddField("Commands count", ctx.CommandsNext.RegisteredCommands.Count.ToString());
+            embed.AddField("Guilds", $"In {ctx.Client.Guilds.Count} guilds");
+			embed.AddField("Memes", Directory.GetFiles(Program.assetsDir + "/bot/funny").Length.ToString());
+            embed.AddField("Ping", ctx.Client.Ping.ToString() + "ms");
 
-				await ctx.RespondAsync(embed);
-            }
-		}
-
-		[Command("perm")]
-		[Hidden]
-		public async Task Perm(CommandContext ctx, ulong id)
-		{
-			// change users who can !kill
-			// uses Program.HasPerms
-			if (ctx.Member.Id == 563891145256468481)
-			{
-				if (Program.HasPerms.Contains(id))
-				{
-					Program.HasPerms.Remove(id);
-					await ctx.RespondAsync($"Removed <@{id}>");
-				}
-				else
-				{
-					Program.HasPerms.Add(id);
-					await ctx.RespondAsync($"Added <@{id}>");
-				}
-			}
+			await ctx.RespondAsync(embed);
 		}
 
 		[Command("actuallyfuckingdie")]
@@ -278,49 +234,6 @@ namespace armada
 			if (ctx.Member.Id == 563891145256468481)
 			{
 				await ctx.Client.DisconnectAsync();
-			}
-		}
-
-		[Command("kill")]
-		[Hidden]
-		public async Task KillCommand(CommandContext ctx)
-		{
-			// Makes the bot ignore a guild
-			// Uses Program.InactiveServers
-			if (Program.HasPerms.Contains(ctx.Member.Id))
-			{
-				if (!Program.InactiveServers.Contains(ctx.Guild.Id))
-				{
-					Program.InactiveServers.Add(ctx.Guild.Id);
-					await ctx.RespondAsync($"{ctx.Member.Mention} has disabled the bot in this guild.");
-				}
-				else
-				{
-					Program.InactiveServers.Remove(ctx.Guild.Id);
-					await ctx.RespondAsync($"{ctx.Member.Mention} has enabled the bot in this guild.");
-				}
-			}
-		}
-
-		[Command("changefunny")]
-		[Hidden]
-		public async Task YouFunny(CommandContext ctx, ulong id)
-		{
-			// changes a users persission to use voice chat commands
-			// uses	Program.NotFunny
-
-			if (!Program.InactiveServers.Contains(ctx.Member.Id))
-			{
-				if (Program.NotFunny.Contains(id))
-				{
-					Program.NotFunny.Remove(id);
-					await ctx.RespondAsync($"Good ending {DiscordEmoji.FromName(ctx.Client, ":smiley:")}");
-				}
-				else
-				{
-					Program.NotFunny.Add(id);
-					await ctx.RespondAsync($"{ctx.Client.GetUserAsync(id).Result.Mention} fuck you {DiscordEmoji.FromName(ctx.Client, ":skull:")}");
-				}
 			}
 		}
 
@@ -354,35 +267,32 @@ namespace armada
 		public async Task Swear(CommandContext ctx)
 		{
 			// Displays swear counter leaderboard
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			DiscordEmbedBuilder embed = new()
 			{
-				DiscordEmbedBuilder embed = new()
-				{
-					Color = DiscordColor.HotPink
-				};
-				embed.AddField("Total", Program.swearCount.ToString());
+				Color = DiscordColor.HotPink
+			};
+			embed.AddField("Total", Program.swearCount.ToString());
 
-				string board = "";
+			string board = "";
 
-				var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
-				foreach (var user in sorted)
+			var sorted = Program.leaderboard.OrderByDescending(key => key.Value);
+			foreach (var user in sorted)
+			{
+				if (user.Value != 0)
 				{
-					if (user.Value != 0)
-					{
-						board += $"\r\n<@{user.Key}> - {user.Value}";
-					}
+					board += $"\r\n<@{user.Key}> - {user.Value}";
 				}
-
-				if (board == "")
-				{
-					board = "Nothing to display :(";
-				}
-
-				embed.AddField("Leaderboard", board);
-
-				await ctx.RespondAsync(embed);
 			}
+
+			if (board == "")
+			{
+				board = "Nothing to display :(";
+			}
+
+			embed.AddField("Leaderboard", board);
+
+			await ctx.RespondAsync(embed);
+			
 		}
 
 		[Command("swearcount")]
@@ -390,26 +300,21 @@ namespace armada
 		{
 			// gives swear count of a specific user along with the ratio of messages with swears to messages without
 			// uses Program.leaderboard and Program.ratios
-
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			DiscordEmbedBuilder embed = new()
 			{
-				DiscordEmbedBuilder embed = new()
-				{
-					Color = DiscordColor.HotPink
-				};
+				Color = DiscordColor.HotPink
+			};
 
-				if (Program.leaderboard.ContainsKey(id))
-				{
-					embed.AddField("Swear count", Program.leaderboard[id].ToString());
-					embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({ Math.Round((double) Program.leaderboard[id] / (double) Program.ratios[id] * 100, 2)}%)");
-				}
-				else
-				{
-					embed.AddField("Error", $"No data for <@{id}>\r\nSpeaking in any server with armada will automatically add them to the leaderboard");
-				}
-
-				await ctx.RespondAsync(embed);
+			if (Program.leaderboard.ContainsKey(id))
+			{
+				embed.AddField("Swear count", Program.leaderboard[id].ToString());
+				embed.AddField("Ratio", $"{Program.leaderboard[id]}/{Program.ratios[id]} ({ Math.Round(Convert.ToDouble(Program.leaderboard[id]) / Convert.ToDouble(Program.ratios[id]) * 100, 6)}%)");
 			}
+			else
+			{
+				embed.AddField("Error", $"No data for <@{id}>\r\nSpeaking in any server with armada will automatically add them to the leaderboard");
+			}
+			await ctx.RespondAsync(embed);
 		}
 
 		// Allows users with permission to change the swearcount of a user
@@ -482,51 +387,48 @@ namespace armada
 		public async Task Teams(CommandContext ctx)
 		{
 			// groups users that react to a message into 2 random teams
-			if (!Program.InactiveServers.Contains(ctx.Guild.Id))
+			DiscordEmbedBuilder embed = new()
 			{
-				DiscordEmbedBuilder embed = new()
-				{
-					Color = DiscordColor.HotPink
-				};
+				Color = DiscordColor.HotPink
+			};
 
-				var msg = ctx.Channel.SendMessageAsync($"React to this message with {DiscordEmoji.FromName(ctx.Client, ":skull:")} within the next 20 seconds to added to a team");
-				var react = msg.Result.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
+			var msg = ctx.Channel.SendMessageAsync($"React to this message with {DiscordEmoji.FromName(ctx.Client, ":skull:")} within the next 20 seconds to added to a team");
+			var react = msg.Result.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"));
 
-				await Task.Delay(TimeSpan.FromSeconds(20));
+			await Task.Delay(TimeSpan.FromSeconds(20));
 
-				var users = msg.Result.GetReactionsAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"), 50).Result.ToList();
+			var users = msg.Result.GetReactionsAsync(DiscordEmoji.FromName(ctx.Client, ":armada:"), 50).Result.ToList();
 
-				if (users.Count < 2)
-				{
-					embed.AddField("Error", "Less than 2 people reacted");
-					return;
-				}
-
-				users.OrderBy(x => random.Next(0, users.Count - 1));
-
-				string Team1 = "";
-				string Team2 = "";
-
-				bool Randomness = true;
-				foreach (var member in users)
-				{
-					if (Randomness)
-					{
-						Team1 += $"\r\n{member.Mention}";
-						Randomness = false;
-					}
-					else
-					{
-						Team2 += $"\r\n{member.Mention}";
-						Randomness = true;
-					}
-				}
-
-				embed.AddField("Team 1", Team1);
-				embed.AddField("Team 2", Team2);
-
-				await ctx.RespondAsync(embed);
+			if (users.Count < 2)
+			{
+				embed.AddField("Error", "Less than 2 people reacted");
+				return;
 			}
+
+			users.OrderBy(x => random.Next(0, users.Count - 1));
+
+			string Team1 = "";
+			string Team2 = "";
+
+			bool Randomness = true;
+			foreach (var member in users)
+			{
+				if (Randomness)
+				{
+					Team1 += $"\r\n{member.Mention}";
+					Randomness = false;
+				}
+				else
+				{
+					Team2 += $"\r\n{member.Mention}";
+					Randomness = true;
+				}
+			}
+
+			embed.AddField("Team 1", Team1);
+			embed.AddField("Team 2", Team2);
+
+			await ctx.RespondAsync(embed);
 		}
  
 	}
