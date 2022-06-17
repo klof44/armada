@@ -25,7 +25,7 @@ namespace armada
             Program.LoadSwears();
 			if (Directory.GetFiles(Program.assetsDir + "/bot/funny").Length == 0)
 			{
-				Console.WriteLine("WARNING!!!! NO MEMES FOUND IN " + Program.assetsDir + "/bot/funny");
+				Console.WriteLine("WARNING!!!! NO MEMES FOUND IN " + assetsDir + "/bot/funny");
 			}
             Program.MainAsync().GetAwaiter().GetResult();
         }
@@ -54,14 +54,14 @@ namespace armada
 
 			var slash = discord.UseSlashCommands();
 			
-			slash.RegisterCommands<SlashCommands>(913249395661750343);
-			slash.RegisterCommands<SlashCommands>(754835352950276189);
+			slash.RegisterCommands<SlashCommands>(913249395661750343); // Armada Dev
+			slash.RegisterCommands<SlashCommands>(754835352950276189); // Spudland
 
 			await discord.ConnectAsync();
 
 			discord.Ready += async (s, e) =>
 			{
-				await discord.UpdateStatusAsync(new DiscordActivity("YOUR balls", ActivityType.Playing));
+				await discord.UpdateStatusAsync(new DiscordActivity("with YOUR balls", ActivityType.Playing));
 			};
 
 			await lavalink.ConnectAsync(lavalinkConfig);
@@ -235,7 +235,8 @@ namespace armada
 			Token = Program.token,
 			TokenType = TokenType.Bot,
 			Intents = DiscordIntents.All,
-			MinimumLogLevel = LogLevel.Debug
+			MinimumLogLevel = LogLevel.Debug,
+			ReconnectIndefinitely = true,
 		});
 
 		internal static CommandsNextExtension commands = Program.discord.UseCommandsNext(new CommandsNextConfiguration
