@@ -221,6 +221,57 @@ namespace armada
 			// Displays the queue
 			await MusicPlayer.SayQueue(ctx);
 		}
+
+		[SlashCommand("Shuffle", "Shuffles the queue")]
+		public async Task Shuffle(InteractionContext ctx)
+		{
+			// Shuffles the queue
+			await MusicPlayer.Shuffle(ctx);
+		}
+
+		[SlashCommand("vol", "Adjust music volume")]
+		public async Task Volume(InteractionContext ctx, [Option("volume", "The desired volume level")] long volume)
+		{
+			// Changes volume of music
+
+			if (ctx.Member.VoiceState == null)
+			{
+				DiscordEmbedBuilder embedDeny = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "You can't do that"
+				};
+				
+				await ctx.CreateResponseAsync(embedDeny);
+				return;
+			}
+
+			DiscordEmbedBuilder embed = new()
+			{
+				Color = DiscordColor.HotPink
+			};
+
+			if (volume > 100)
+			{
+				if (ctx.Member.Id == 563891145256468481)
+				{
+					await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(Convert.ToInt32(volume));
+					embed.Title = $"Volume set to {volume}%";
+				}
+				else
+				{
+					await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(100);
+					embed.Title = $"Volume set to 100% becasue {volume} is too high";
+				}
+			}
+			else
+			{
+				await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(Convert.ToInt32(volume));
+				embed.Title = $"Volume set to {volume}%";
+			}
+
+			await ctx.CreateResponseAsync(embed);
+		}
 	}
 
 	public class RequireUserIdAttribute : SlashCheckBaseAttribute

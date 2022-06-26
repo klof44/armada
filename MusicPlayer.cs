@@ -205,10 +205,57 @@ namespace armada
 				{
 					embed.AddField("No tracks in queue", "Add some with `!play`");
 				}
+				if (musicPlayers[ctx.Guild.Id].musicQueue.Count >= 24)
+				{
+					int posGreaterThat24 = 0;
+					for (int i = 23; i >= 0; i--)
+					{
+						var track = musicPlayers[ctx.Guild.Id].musicQueue.ElementAt(posGreaterThat24);
+						embed.AddField($"{posGreaterThat24} - {track.Title} - {track.Author}", track.Length.ToString());
+						posGreaterThat24++;
+					}
+					embed.AddField($"+{musicPlayers[ctx.Guild.Id].musicQueue.Count - 24} more tracks", "Discord embed size limit");
+				}
+				else
+				{
+					int posInQueue = 0;
+					foreach (var track in musicPlayers[ctx.Guild.Id].musicQueue)
+					{
+						embed.AddField($"{posInQueue} - {track.Title} - {track.Author}", track.Length.ToString());
+						posInQueue++;
+					}
+				}
+
+				await ctx.RespondAsync(embed);
+			}
+		}
+
+		public static async Task Shuffle(CommandContext ctx)
+		{
+			if (musicPlayers.ContainsKey(ctx.Guild.Id))
+			{
+				List<LavalinkTrack> tracksFromQueue = new List<LavalinkTrack>();
 				foreach (var track in musicPlayers[ctx.Guild.Id].musicQueue)
 				{
-					embed.AddField($"{track.Title} - {track.Author}", track.Length.ToString());
+					tracksFromQueue.Add(track);
 				}
+
+				var rng = new Random();
+				var shuffled = tracksFromQueue.OrderBy(x => rng.Next(0, tracksFromQueue.Count - 1));
+
+				musicPlayers[ctx.Guild.Id].musicQueue.Clear();
+
+				foreach (var track in shuffled)
+				{
+					musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Queue was shuffled",
+				};
+				embed.AddField("Warning", "Tracks added after shuffle are added to the end of the queue, use `/shuffle` any time to reshuffle");
 				await ctx.RespondAsync(embed);
 			}
 		}
@@ -400,10 +447,57 @@ namespace armada
 				{
 					embed.AddField("No tracks in queue", "Add some with `!play`");
 				}
+				if (musicPlayers[ctx.Guild.Id].musicQueue.Count >= 24)
+				{
+					int posGreaterThat24 = 0;
+					for (int i = 23; i >= 0; i--)
+					{
+						var track = musicPlayers[ctx.Guild.Id].musicQueue.ElementAt(posGreaterThat24);
+						embed.AddField($"{posGreaterThat24} - {track.Title} - {track.Author}", track.Length.ToString());
+						posGreaterThat24++;
+					}
+					embed.AddField($"+{musicPlayers[ctx.Guild.Id].musicQueue.Count - 24} more tracks", "Discord embed size limit");
+				}
+				else
+				{
+					int posInQueue = 0;
+					foreach (var track in musicPlayers[ctx.Guild.Id].musicQueue)
+					{
+						embed.AddField($"{posInQueue} - {track.Title} - {track.Author}", track.Length.ToString());
+						posInQueue++;
+					}
+				}
+
+				await ctx.CreateResponseAsync(embed);
+			}
+		}
+
+		public static async Task Shuffle(InteractionContext ctx)
+		{
+			if (musicPlayers.ContainsKey(ctx.Guild.Id))
+			{
+				List<LavalinkTrack> tracksFromQueue = new List<LavalinkTrack>();
 				foreach (var track in musicPlayers[ctx.Guild.Id].musicQueue)
 				{
-					embed.AddField($"{track.Title} - {track.Author}", track.Length.ToString());
+					tracksFromQueue.Add(track);
 				}
+
+				var rng = new Random();
+				var shuffled = tracksFromQueue.OrderBy(x => rng.Next(0, tracksFromQueue.Count - 1));
+
+				musicPlayers[ctx.Guild.Id].musicQueue.Clear();
+
+				foreach (var track in shuffled)
+				{
+					musicPlayers[ctx.Guild.Id].musicQueue.Enqueue(track);
+				}
+
+				DiscordEmbedBuilder embed = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "Queue was shuffled",
+				};
+				embed.AddField("Warning", "Tracks added after shuffle are added to the end of the queue, use `/shuffle` any time to reshuffle");
 				await ctx.CreateResponseAsync(embed);
 			}
 		}

@@ -66,7 +66,7 @@ namespace armada
 			{
 				if (!cmd.Value.IsHidden)
 				{
-						CommandList += $" `{cmd.Key}` ";
+					CommandList += $" `{cmd.Key}` ";
 				}
 			}
 
@@ -376,6 +376,57 @@ namespace armada
 		{
 			// Displays the queue
 			await MusicPlayer.SayQueue(ctx);
+		}
+
+		[Command("shuffle")]
+		public async Task Shuffle(CommandContext ctx)
+		{
+			// Shuffles the queue
+			await MusicPlayer.Shuffle(ctx);
+		}
+
+		[Command("vol")]
+		public async Task Volume(CommandContext ctx, int volume)
+		{
+			// Changes volume of music
+
+			if (ctx.Member.VoiceState == null)
+			{
+				DiscordEmbedBuilder embedDeny = new()
+				{
+					Color = DiscordColor.HotPink,
+					Title = "You can't do that"
+				};
+
+				await ctx.RespondAsync(embedDeny);
+				return;
+			}
+
+			DiscordEmbedBuilder embed = new()
+			{
+				Color = DiscordColor.HotPink
+			};
+
+			if (volume > 100)
+			{
+				if (ctx.Member.Id == 563891145256468481)
+				{
+					await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(volume);
+					embed.Title = $"Volume set to {volume}%";
+				}
+				else
+				{
+					await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(100);
+					embed.Title = $"Volume set to 100% becasue {volume} is too high";
+				}
+			}
+			else
+			{
+				await ctx.Client.GetLavalink().GetGuildConnection(ctx.Guild).SetVolumeAsync(volume);
+				embed.Title = $"Volume set to {volume}%";
+			}
+
+			await ctx.RespondAsync(embed);
 		}
 
 		[Command("makebalancedteams")]
