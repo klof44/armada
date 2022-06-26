@@ -12,38 +12,6 @@ namespace armada
 {
     internal class Commands : BaseCommandModule
 	{
-		private static Random random = new Random();
-        [Command("roll")]
-		public async Task Roll(CommandContext ctx, int count, int sides, int mod = 0)
-		{
-			// dice roll command
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            {
-				Color = DiscordColor.HotPink,
-                Title = $"{count}d{sides} + {mod}",
-            };
-
-            long total = 0;
-            string rolls = "";
-            for (int i = 0; i < count; i++)
-            {
-                int roll = random.Next(1, sides + 1);
-                rolls += $"{roll}{DiscordEmoji.FromName(ctx.Client, ":black_small_square:")}";
-                total += roll;
-            }
-
-            if (mod != 0)
-            {
-				embed.AddField($"Total: {total}", $"{rolls}");
-            }
-			else
-            {
-				embed.AddField($"Total: {total + mod}", $"{rolls}");
-			}
-
-			await ctx.RespondAsync(embed);
-		}
-
 		//basic help command
 		[Command("help")]
 		public async Task Help(CommandContext ctx)
@@ -77,6 +45,7 @@ namespace armada
 
 		}
 
+		Random random = new Random();
 		[Command("funny")]
 		public async Task Funny(CommandContext ctx)
 		{

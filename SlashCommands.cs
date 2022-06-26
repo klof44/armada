@@ -12,37 +12,6 @@ namespace armada
 {
     internal class SlashCommands : ApplicationCommandModule
 	{
-        [SlashCommand("roll", "Roll as many dice as you want")]
-		public async Task Roll(InteractionContext ctx, [Option("Count", "How many dice you want to roll")] long count, [Option("Sides", "How many sides are on the dice")] long sides, [Option("Modifier", "Adds to the total")] long mod)
-		{
-			// dice roll command
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            {
-				Color = DiscordColor.HotPink,
-                Title = $"{count}d{sides} + {mod}",
-            };
-
-            long total = 0;
-            string rolls = "";
-            for (int i = 0; i < count; i++)
-            {
-                long roll = random.Next(1, (int) sides + 1);
-                rolls += $"{roll}{DiscordEmoji.FromName(ctx.Client, ":black_small_square:")}";
-                total += roll;
-            }
-
-            if (mod != 0)
-            {
-				embed.AddField($"Total: {total}", $"{rolls}");
-            }
-			else
-            {
-				embed.AddField($"Total: {total + mod}", $"{rolls}");
-			}
-
-			await ctx.CreateResponseAsync(embed);
-		}
-
 		[SlashCommand("help", "Base help command for non-slash commands")]
 		public async Task Help(InteractionContext ctx)
 		{
