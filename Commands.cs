@@ -63,7 +63,6 @@ namespace armada
 			await ctx.RespondAsync(message);
 		}
 
-		Dictionary<ulong, CommandContext> submissions = new Dictionary<ulong, CommandContext>();
 		[Command("addmeme")]
 		public async Task AddMeme(CommandContext ctx, Uri url)
 		{
@@ -84,14 +83,13 @@ namespace armada
 				embed.AddField("URL", url.ToString());
 
 				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
-
-				submissions.Add(message.Id, ctx);
-				}
+			}
 			else
 			{
 				await ctx.RespondAsync("Please use a url starting with `https://cdn.discordapp.com/attachments/` or `https://media.discordapp.com/attachments/`");
 			}
 		}
+
 		[Command("addmeme")]
 		public async Task MemeNoLink(CommandContext ctx)
 		{
@@ -113,58 +111,10 @@ namespace armada
 				embed.AddField("URL", url.ToString());
 
 				await channel.CreateDmChannelAsync().Result.SendMessageAsync(embed);
-
-				submissions.Add(message.Id, ctx);
 			}
 			else
 			{
 				await ctx.RespondAsync("Please use a `.mp4`, `.gif`, `.webm`, `.png`, or `.jpg` file");
-			}
-		}
-
-		[Command("judge")]
-		[Hidden]
-		public async Task JudgeMeme(CommandContext ctx, ulong id, string verdict)
-		{
-			if (ctx.Channel.IsPrivate && ctx.User.Id == 563891145256468481)
-			{
-				Uri url = new Uri("https://cdn.discordapp.com/attachments/");
-				if (submissions[id].Message.Embeds.First() != null)
-				{
-					url = new Uri(submissions[id].Message.Embeds.First().Url.ToString());
-				}
-				else if (submissions[id].Message.Attachments.First() != null)
-				{
-					url = new Uri(submissions[id].Message.Attachments.First().Url);
-				}
-				else
-				{
-					url = new Uri(submissions[id].Message.Content.Remove(0, 8));
-				}
-				try
-				{
-					if (verdict.ToLower() == "good")
-					{
-						WebClient client = new WebClient();
-						byte[] data = client.DownloadData(url);
-						File.WriteAllBytes(Program.assetsDir + "/bot/funny/" + id + "." + submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last(), data);
-
-						await submissions[id].RespondAsync($"Downloaded as {id}.{submissions[id].Message.Embeds.First().Url.ToString().Split(".").Last()}");
-						submissions.Remove(id);
-					}
-					if (verdict.ToLower() == "bad")
-					{
-						await ctx.Client.GetGuildAsync(913249395661750343).Result.GetMemberAsync(563891145256468481).Result.CreateDmChannelAsync().Result.GetMessageAsync(id).Result.DeleteAsync();
-						await submissions[id].RespondAsync("Denied");
-						submissions.Remove(id);
-					}
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine(ex.Message);
-					Console.WriteLine(ex.InnerException);
-					Console.WriteLine(ex.StackTrace);
-				}
 			}
 		}
 
