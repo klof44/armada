@@ -53,9 +53,18 @@ namespace armada
 			var lavalink = discord.UseLavalink();
 
 			var slash = discord.UseSlashCommands();
-			
-			slash.RegisterCommands<SlashCommands>(913249395661750343); // Armada Dev
-			slash.RegisterCommands<SlashCommands>(754835352950276189); // Spudland
+
+			foreach (KeyValuePair<ulong, DiscordGuild> guild in discord.Guilds)
+			{
+				try
+				{
+					slash.RegisterCommands<SlashCommands>(guild.Key);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Could not enable slash commands in {guild.Value.Name}:\r\n{ex.Message}");
+				}
+			}
 
 			await discord.ConnectAsync();
 

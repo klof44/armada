@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Lavalink;
 using System.IO;
-using System.Net;
 namespace armada
 {
     internal class Commands : BaseCommandModule

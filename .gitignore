@@ -382,3 +382,4 @@ armada.dll
 armada.deps.json
 bot/*
 DSharpPlus.SlashCommands.dll
+.vscode/tasks.json
